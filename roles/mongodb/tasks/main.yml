@@ -25,6 +25,10 @@
   pip:
     name: pymongo
     state: present
+- name: Is Authentication enabled?
+  command: grep "^auth = true" /etc/mongodb.conf
+  register: auth
+  ignore_errors: yes
 - name: Add an administrator to the db
   mongodb_user:
     database: admin
@@ -32,6 +36,7 @@
     password: "{{ dbpass }}"
     roles: root
     state: present
+  when: auth.rc == 1     #Return code/status | will run if auth is false
 - name: Enable Authentication
   lineinfile:
     path: /etc/mongodb.conf
@@ -39,3 +44,12 @@
     line: 'auth = true'
   notify:
     - restart mongodb
+- name: Create the application mongodb_user
+  mongodb_user:
+    login_user: root
+    login_password: "{{ dbpass }}"
+    name: "{{ appdbuser }}"
+    password: "{{ appdbpass }}"
+    database: "{{ dbname }}"
+    roles: dbOwner
+    state: present
