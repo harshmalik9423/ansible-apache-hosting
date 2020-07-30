@@ -29,7 +29,7 @@
   mongodb_user:
     database: admin
     name: root
-    password: {{ dbpass }}
+    password: "{{ dbpass }}"
     roles: root
     state: present
 - name: Enable Authentication
@@ -37,5 +37,5 @@
     path: /etc/mongodb.conf
     regexp: '^#?auth \= true'
     line: 'auth = true'
-  nofity:
-  - restart mongodb
+  notify:
+    - restart mongodb
